@@ -26,6 +26,8 @@ Site estático (`index.html` + jsPDF). A chave **Web3Forms não fica no reposit�
 
 ## Desenvolvimento local
 
+No `<script>`, `RELAXED_VALIDATION = true` libera avançar sem preencher obrigatórios (testes). Para produção, use `false`.
+
 Abra `index.html` no navegador. Enquanto `web3AccessKey` for o placeholder `__WEB3_FORMS_KEY__`, o envio automático não funciona — para testar, substitua temporariamente pela chave (sem commitar) ou rode um `sed` local.
 
 O arquivo `formulario-ir-saude (3).html` é cópia de trabalho; o deploy usa **`index.html`**.

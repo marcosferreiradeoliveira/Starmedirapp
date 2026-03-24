@@ -526,6 +526,9 @@ const FORM_CONFIG = {
   tryAttachPdf: true
 };
 
+/** `true` = testes: avança entre passos sem exigir campos (*). `false` = produção (obrigatórios no passo 1). */
+const RELAXED_VALIDATION = true;
+
 let currentStep = 1;
 const TOTAL = 7;
 let despCount=0, empregoCount=0, imovelCount=0, veiculoCount=0, depCount=0;
@@ -568,6 +571,13 @@ function updateProgress() {
 }
 
 function validateStep(step) {
+  if (RELAXED_VALIDATION) {
+    ['nome','cpf','nascimento','telefone','email','govLogin','govSenha'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('invalid');
+    });
+    return true;
+  }
   let ok = true;
   if (step === 1) {
     ['nome','cpf','nascimento','telefone','email','govLogin','govSenha'].forEach(id => {
