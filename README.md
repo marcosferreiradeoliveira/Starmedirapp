@@ -11,6 +11,6 @@ O e-mail que recebe as notificações é o da conta Web3Forms da chave; no códi
 
 ## Desenvolvimento local
 
-`RELAXED_VALIDATION = true` libera avançar sem obrigatórios (testes). Para produção, use `false`.
+`RELAXED_VALIDATION = false` exige os campos obrigatórios (*) no passo 1. Para testes sem validação, use `true`.
 
 O arquivo `formulario-ir-saude (3).html` é cópia do `index.html`; o deploy usa **`index.html`**.
