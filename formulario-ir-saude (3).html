@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Formulário IR 2025 · StartMedIR</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #1a6b4a; --green-mid: #2a8f63; --green-light: #d4efe4;
+      --gold: #c8963e; --gold-light: #fdf3e3;
+      --red: #e53e3e;
+      --text: #1c1c1c; --muted: #6b7280; --border: #d1d9d5;
+      --bg: #f7faf8; --white: #fff;
+      --radius: 12px; --shadow: 0 4px 24px rgba(26,107,74,.10);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    header {
+      background: var(--green); color: white;
+      padding: 1.2rem 2rem 1rem; text-align: center; position: relative; overflow: hidden;
+    }
+    header::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 70% 0%, rgba(200,150,62,.2) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    header .badge {
+      display: inline-block; background: var(--gold); color: white;
+      font-size: .65rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 20px; margin-bottom: .5rem;
+    }
+    header h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.2rem,3vw,1.7rem); font-weight: 700; line-height: 1.2; margin-bottom: .3rem; }
+    header p { font-size: .82rem; opacity: .82; max-width: 500px; margin: 0 auto; }
+
+    .container { max-width: 800px; margin: 0 auto; padding: 1.4rem 1.2rem 3rem; }
+
+    .progress-wrap { overflow-x: auto; padding-bottom: .3rem; margin-bottom: 1.4rem; }
+    .progress-bar { display: flex; align-items: center; justify-content: center; gap: 0; min-width: 580px; }
+    .step-indicator { display: flex; flex-direction: column; align-items: center; }
+    .step-indicator .dot {
+      width: 26px; height: 26px; border-radius: 50%; background: var(--border); color: var(--muted);
+      font-size: .7rem; font-weight: 600; display: flex; align-items: center; justify-content: center;
+      transition: all .3s; border: 2px solid var(--border); z-index: 1;
+    }
+    .step-indicator.active .dot { background: var(--green); color: white; border-color: var(--green); box-shadow: 0 0 0 4px rgba(26,107,74,.15); }
+    .step-indicator.done .dot { background: var(--green-mid); color: white; border-color: var(--green-mid); }
+    .step-indicator .lbl { font-size: .58rem; color: var(--muted); margin-top: 4px; white-space: nowrap; }
+    .step-indicator.active .lbl { color: var(--green); font-weight: 600; }
+    .connector { width: 28px; height: 2px; background: var(--border); margin-bottom: 14px; transition: background .3s; flex-shrink: 0; }
+    .connector.done { background: var(--green-mid); }
+
+    .section { display: none; animation: fadeUp .3s ease; }
+    .section.active { display: block; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+    .sec-title { margin-bottom: .9rem; }
+    .sec-title h2 { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--green); margin-bottom: .15rem; }
+    .sec-title p { font-size: .8rem; color: var(--muted); }
+
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem; margin-bottom: .8rem; box-shadow: var(--shadow); }
+    .card-title { font-family: 'Playfair Display', serif; font-size: .92rem; color: var(--green); margin-bottom: .8rem; padding-bottom: .45rem; border-bottom: 1px solid var(--green-light); display: flex; align-items: center; gap: .4rem; }
+
+    .field { margin-bottom: .75rem; }
+    .field:last-child { margin-bottom: 0; }
+    label { display: block; font-size: .78rem; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+    label .req { color: var(--gold); }
+    input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date],
+    input[type=password], select, textarea {
+      width: 100%; padding: 7px 10px; border: 1.5px solid var(--border); border-radius: 7px;
+      font-family: 'DM Sans', sans-serif; font-size: .84rem; color: var(--text);
+      background: var(--bg); transition: border-color .2s, box-shadow .2s; outline: none; appearance: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(26,107,74,.10); background: white; }
+    input.invalid, select.invalid { border-color: var(--red) !important; }
+    textarea { resize: vertical; min-height: 60px; }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+    .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .7rem; }
+    .money-wrap { position: relative; }
+    .money-wrap .pfx { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: .8rem; color: var(--muted); pointer-events: none; }
+    .money-wrap input { padding-left: 30px; }
+    .pill-group { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: 4px; }
+    .pill-group label { display: flex; align-items: center; gap: 5px; cursor: pointer; background: var(--bg); border: 1.5px solid var(--border); border-radius: 7px; padding: 5px 10px; font-size: .79rem; font-weight: 400; transition: all .18s; margin: 0; }
+    .pill-group label:has(input:checked) { border-color: var(--green); background: var(--green-light); color: var(--green); font-weight: 500; }
+    .pill-group input { width: 13px; height: 13px; accent-color: var(--green); flex-shrink: 0; }
+    .add-btn { display: inline-flex; align-items: center; gap: 5px; font-size: .78rem; font-weight: 500; color: var(--green); background: none; border: 1.5px dashed var(--green-mid); border-radius: 7px; padding: 5px 11px; cursor: pointer; margin-top: .5rem; transition: background .18s; }
+    .add-btn:hover { background: var(--green-light); }
+    .dyn-row { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: .75rem; margin-top: .6rem; position: relative; }
+    .rm-btn { position: absolute; top: 6px; right: 8px; background: none; border: none; font-size: .75rem; color: var(--red); cursor: pointer; font-weight: 500; }
+    .info-box { background: var(--gold-light); border: 1px solid #f0d9a8; border-radius: 7px; padding: .6rem .85rem; font-size: .78rem; color: #7a5a1e; margin-bottom: .8rem; display: flex; gap: 7px; align-items: flex-start; line-height: 1.4; }
+    .warn-box { background: #fff8f0; border: 1px solid #ffd59e; border-radius: 7px; padding: .6rem .85rem; font-size: .78rem; color: #8a4a00; margin-bottom: .8rem; display: flex; gap: 7px; align-items: flex-start; line-height: 1.4; }
+    .ok-box { background: var(--green-light); border: 1px solid #a8d9c2; border-radius: 7px; padding: .6rem .85rem; font-size: .78rem; color: var(--green); margin-bottom: .8rem; display: flex; gap: 7px; align-items: flex-start; line-height: 1.4; }
+    .doc-list { list-style: none; display: grid; gap: .45rem; }
+    .doc-list li { display: flex; align-items: flex-start; gap: .6rem; font-size: .82rem; line-height: 1.4; }
+    .doc-list li .icon { width: 26px; height: 26px; border-radius: 5px; background: var(--green-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: .85rem; margin-top: 1px; }
+    .doc-list li strong { display: block; font-weight: 600; color: var(--text); }
+    .doc-list li span { color: var(--muted); font-size: .76rem; }
+    .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1.2rem; gap: 1rem; }
+    .btn { padding: 9px 20px; border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: .84rem; font-weight: 500; cursor: pointer; border: none; transition: all .2s; }
+    .btn-outline { background: white; border: 1.5px solid var(--border); color: var(--muted); }
+    .btn-outline:hover { border-color: var(--green); color: var(--green); }
+    .btn-primary { background: var(--green); color: white; box-shadow: 0 2px 10px rgba(26,107,74,.22); }
+    .btn-primary:hover { background: var(--green-mid); transform: translateY(-1px); }
+    .btn-gold { background: var(--gold); color: white; box-shadow: 0 2px 10px rgba(200,150,62,.28); font-size: .92rem; padding: 10px 26px; }
+    .btn-gold:hover { background: #b5832e; transform: translateY(-1px); }
+    .btn-green { background: var(--green); color: white; box-shadow: 0 2px 10px rgba(26,107,74,.22); font-size: .92rem; padding: 10px 26px; }
+    .btn-green:hover { background: var(--green-mid); transform: translateY(-1px); }
+    .btn:disabled { opacity: .6; cursor: not-allowed; transform: none !important; }
+    .sum-section { margin-bottom: .9rem; }
+    .sum-section h3 { font-size: .7rem; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--green); margin-bottom: .4rem; padding-bottom: .3rem; border-bottom: 1px solid var(--green-light); }
+    .sum-item { display: flex; justify-content: space-between; font-size: .8rem; padding: 3px 0; gap: 1rem; border-bottom: 1px solid var(--bg); }
+    .sum-item .sk { color: var(--muted); flex-shrink: 0; }
+    .sum-item .sv { font-weight: 500; text-align: right; word-break: break-word; max-width: 58%; white-space: pre-wrap; }
+    .pass-wrap { position: relative; }
+    .pass-wrap input { padding-right: 40px; }
+    .pass-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: .9rem; color: var(--muted); }
+
+    /* SUCCESS PAGE */
+    .success-page { text-align: center; padding: 1.6rem 1rem; }
+    .success-page .big-icon { width: 60px; height: 60px; background: var(--green-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto .9rem; font-size: 1.7rem; }
+    .success-page h2 { font-family: 'Playfair Display', serif; font-size: 1.35rem; color: var(--green); margin-bottom: .35rem; }
+    .success-page .subtitle { color: var(--muted); font-size: .84rem; margin-bottom: 1.2rem; }
+
+    .pdf-instruction { background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1rem; margin: 1rem 0; text-align: left; }
+    .pdf-instruction h3 { font-size: .88rem; color: var(--green); margin-bottom: .7rem; font-family: 'Playfair Display', serif; }
+    .step-list { list-style: none; display: grid; gap: .55rem; }
+    .step-list li { display: flex; align-items: flex-start; gap: .6rem; font-size: .82rem; line-height: 1.4; }
+    .step-list li .num { width: 22px; height: 22px; background: var(--green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .68rem; font-weight: 600; flex-shrink: 0; margin-top: 1px; }
+    .step-list li strong { color: var(--text); }
+    .step-list li span { color: var(--muted); }
+
+    .email-highlight { display: inline-block; background: var(--green-light); color: var(--green); font-weight: 600; padding: 2px 8px; border-radius: 5px; font-size: .88rem; }
+    .action-buttons { display: flex; flex-direction: column; gap: .6rem; align-items: center; margin-top: 1rem; }
+    .action-buttons .btn { width: 100%; max-width: 320px; text-align: center; }
+
+    @media (max-width: 580px) {
+      .row-2, .row-3 { grid-template-columns: 1fr; }
+      .connector { width: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Imposto de Renda · Ano-calendário 2025</div>
+  <h1>Formulário de Coleta de Dados</h1>
+  <p>Preencha todas as informações com atenção. Nossa equipe usará esses dados para preparar sua declaração.</p>
+</header>
+
+<div class="container">
+
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progressBar">
+      <div class="step-indicator active" id="si-1"><div class="dot">1</div><div class="lbl">Dados Pessoais</div></div>
+      <div class="connector" id="conn-1"></div>
+      <div class="step-indicator" id="si-2"><div class="dot">2</div><div class="lbl">Rendimentos</div></div>
+      <div class="connector" id="conn-2"></div>
+      <div class="step-indicator" id="si-3"><div class="dot">3</div><div class="lbl">Saúde</div></div>
+      <div class="connector" id="conn-3"></div>
+      <div class="step-indicator" id="si-4"><div class="dot">4</div><div class="lbl">Bens & Invest.</div></div>
+      <div class="connector" id="conn-4"></div>
+      <div class="step-indicator" id="si-5"><div class="dot">5</div><div class="lbl">Dependentes</div></div>
+      <div class="connector" id="conn-5"></div>
+      <div class="step-indicator" id="si-6"><div class="dot">6</div><div class="lbl">Documentos</div></div>
+      <div class="connector" id="conn-6"></div>
+      <div class="step-indicator" id="si-7"><div class="dot">7</div><div class="lbl">Revisão</div></div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 1 — DADOS PESSOAIS ══ -->
+  <div class="section active" id="sec-1">
+    <div class="sec-title"><h2>Dados Pessoais</h2><p>Informações do titular da declaração</p></div>
+    <div class="card">
+      <div class="row-2">
+        <div class="field"><label>Nome completo <span class="req">*</span></label><input type="text" id="nome" placeholder="Seu nome completo"/></div>
+        <div class="field"><label>CPF <span class="req">*</span></label><input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14"/></div>
+      </div>
+      <div class="row-3">
+        <div class="field"><label>Data de nascimento <span class="req">*</span></label><input type="date" id="nascimento"/></div>
+        <div class="field"><label>Telefone / WhatsApp <span class="req">*</span></label><input type="tel" id="telefone" placeholder="(21) 90000-0000"/></div>
+        <div class="field"><label>E-mail <span class="req">*</span></label><input type="email" id="email" placeholder="seu@email.com"/></div>
+      </div>
+      <div class="row-3">
+        <div class="field"><label>Profissão / Ocupação</label><input type="text" id="profissao" placeholder="Ex: Médico, Engenheiro"/></div>
+        <div class="field"><label>Estado civil</label>
+          <select id="estadoCivil"><option value="">Selecione</option><option>Solteiro(a)</option><option>Casado(a)</option><option>Divorciado(a)</option><option>Viúvo(a)</option><option>União estável</option></select>
+        </div>
+        <div class="field"><label>Título de eleitor</label><input type="text" id="titulo" placeholder="Número do título"/></div>
+      </div>
+      <div class="row-2">
+        <div class="field"><label>Endereço completo</label><input type="text" id="endereco" placeholder="Rua, número, bairro, cidade — CEP"/></div>
+        <div class="field"><label>Tipo de declaração preferida</label>
+          <select id="tipoDeclaracao"><option value="">Selecione</option><option>Completo (deduções legais)</option><option>Simplificado (20% da renda)</option><option>Não sei — deixar a equipe decidir</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔐 Acesso Gov.br</div>
+      <div class="warn-box">⚠️ Suas credenciais são usadas <strong>exclusivamente</strong> para transmissão da declaração pela StartMedIR. Não são compartilhadas com terceiros.</div>
+      <div class="row-2">
+        <div class="field"><label>Login do Gov.br (CPF) <span class="req">*</span></label><input type="text" id="govLogin" placeholder="000.000.000-00"/></div>
+        <div class="field"><label>Senha do Gov.br <span class="req">*</span></label>
+          <div class="pass-wrap"><input type="password" id="govSenha" placeholder="Sua senha"/><button class="pass-toggle" type="button" onclick="togglePass('govSenha',this)">👁</button></div>
+        </div>
+      </div>
+      <div class="field"><label>Código de acesso do programa IRPF (se tiver)</label><input type="text" id="codigoIRPF" placeholder="Opcional"/></div>
+    </div>
+    <div class="nav-row"><span></span><button class="btn btn-primary" onclick="goTo(2)">Próximo →</button></div>
+  </div>
+
+  <!-- ══ STEP 2 — RENDIMENTOS ══ -->
+  <div class="section" id="sec-2">
+    <div class="sec-title"><h2>Rendimentos</h2><p>Informe todas as fontes de renda de 2025</p></div>
+    <div class="info-box">ℹ️ Inclua <strong>todos</strong> os informes de rendimentos — empregadores, INSS, bancos, corretoras, aluguéis, etc.</div>
+
+    <div class="card">
+      <div class="card-title">💼 Emprego / CLT / Pró-labore</div>
+      <div class="field"><label>Possui vínculo empregatício ou pró-labore? <span class="req">*</span></label>
+        <div class="pill-group">
+          <label><input type="radio" name="temEmprego" value="Sim" onchange="showEl('empregoFields')"/> Sim</label>
+          <label><input type="radio" name="temEmprego" value="Não" onchange="hideEl('empregoFields')"/> Não</label>
+        </div>
+      </div>
+      <div id="empregoFields" style="display:none">
+        <div id="empregoList"></div>
+        <button class="add-btn" onclick="addEmprego()">＋ Adicionar empregador</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🧾 Autônomo / MEI / RPA</div>
+      <div class="field"><label>Recebeu rendimentos como autônomo, MEI ou RPA?</label>
+        <div class="pill-group">
+          <label><input type="radio" name="temAutonomo" value="Sim" onchange="showEl('autonomoFields')"/> Sim</label>
+          <label><input type="radio" name="temAutonomo" value="Não" onchange="hideEl('autonomoFields')"/> Não</label>
+        </div>
+      </div>
+      <div id="autonomoFields" style="display:none">
+        <div class="row-3">
+          <div class="field"><label>Receita bruta total (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" id="receitaBruta" placeholder="0,00" min="0" step="0.01"/></div></div>
+          <div class="field"><label>INSS recolhido (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" id="inssMEI" placeholder="0,00" min="0" step="0.01"/></div></div>
+          <div class="field"><label>Emitiu notas fiscais?</label>
+            <div class="pill-group" style="margin-top:.3rem">
+              <label><input type="radio" name="temNF" value="Sim"/> Sim</label>
+              <label><input type="radio" name="temNF" value="Não"/> Não</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏠 Aluguéis Recebidos</div>
+      <div class="field"><label>Recebeu aluguéis em 2025?</label>
+        <div class="pill-group">
+          <label><input type="radio" name="temAluguel" value="Sim" onchange="showEl('aluguelFields')"/> Sim</label>
+          <label><input type="radio" name="temAluguel" value="Não" onchange="hideEl('aluguelFields')"/> Não</label>
+        </div>
+      </div>
+      <div id="aluguelFields" style="display:none">
+        <div class="row-2">
+          <div class="field"><label>Total recebido no ano (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" id="totalAluguel" placeholder="0,00" min="0" step="0.01"/></div></div>
+          <div class="field"><label>Imposto recolhido via carnê-leão (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" id="impostoAluguel" placeholder="0,00" min="0" step="0.01"/></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">👴 Aposentadoria / Pensão / Benefícios</div>
+      <div class="field"><label>Recebe aposentadoria, pensão ou benefício?</label>
+        <div class="pill-group">
+          <label><input type="radio" name="temAposent" value="Sim" onchange="showEl('aposentFields')"/> Sim</label>
+          <label><input type="radio" name="temAposent" value="Não" onchange="hideEl('aposentFields')"/> Não</label>
+        </div>
+      </div>
+      <div id="aposentFields" style="display:none">
+        <div class="row-3">
+          <div class="field"><label>Fonte pagadora</label><input type="text" id="fontePagAposen" placeholder="Ex: INSS, Funpresp"/></div>
+          <div class="field"><label>Total recebido (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" id="totalAposen" placeholder="0,00" min="0" step="0.01"/></div></div>
+          <div class="field"><label>IR retido (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" id="irAposen" placeholder="0,00" min="0" step="0.01"/></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-outline" onclick="goTo(1)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goTo(3)">Próximo →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 3 — SAÚDE ══ -->
+  <div class="section" id="sec-3">
+    <div class="sec-title"><h2>Planos de Saúde & Despesas Médicas</h2><p>Informe todos os gastos dedutíveis com saúde em 2025</p></div>
+    <div class="info-box">ℹ️ Inclua <strong>todas</strong> as despesas com comprovante. Sem nota fiscal ou recibo, a despesa não pode ser deduzida.</div>
+    <div class="card">
+      <div class="card-title">🏥 Plano de Saúde</div>
+      <div class="field"><label>Possui plano de saúde? <span class="req">*</span></label>
+        <div class="pill-group">
+          <label><input type="radio" name="temPlano" value="Sim" onchange="showEl('planoFields')"/> Sim</label>
+          <label><input type="radio" name="temPlano" value="Não" onchange="hideEl('planoFields')"/> Não</label>
+        </div>
+      </div>
+      <div id="planoFields" style="display:none">
+        <div class="row-2">
+          <div class="field"><label>Operadora</label><input type="text" id="operadora" placeholder="Ex: Unimed, Amil, SulAmérica"/></div>
+          <div class="field"><label>CNPJ da operadora</label><input type="text" id="cnpjPlano" placeholder="00.000.000/0000-00"/></div>
+        </div>
+        <div class="row-3">
+          <div class="field"><label>Total pago no ano (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" id="valorPlano" placeholder="0,00" min="0" step="0.01"/></div></div>
+          <div class="field"><label>Reembolsos recebidos do plano (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" id="reembolsoPlano" placeholder="0,00" min="0" step="0.01"/></div></div>
+          <div class="field"><label>Desconto em folha pela empresa (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" id="descontoFolha" placeholder="0,00" min="0" step="0.01"/></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🩺 Consultas, Exames & Procedimentos</div>
+      <p style="font-size:.83rem;color:var(--muted);margin-bottom:.9rem">Médicos, dentistas, psicólogos, hospitais, laboratórios, fisioterapia, etc.</p>
+      <div id="despesasList"></div>
+      <button class="add-btn" onclick="addDespesa()">＋ Adicionar despesa</button>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-outline" onclick="goTo(2)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goTo(4)">Próximo →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 4 — BENS & INVESTIMENTOS ══ -->
+  <div class="section" id="sec-4">
+    <div class="sec-title"><h2>Bens, Dívidas & Investimentos</h2><p>Patrimônio declarado em 31/12/2025</p></div>
+    <div class="card">
+      <div class="card-title">🏡 Imóveis</div>
+      <div class="field"><label>Possui imóvel(is)?</label>
+        <div class="pill-group">
+          <label><input type="radio" name="temImovel" value="Sim" onchange="showEl('imovelFields')"/> Sim</label>
+          <label><input type="radio" name="temImovel" value="Não" onchange="hideEl('imovelFields')"/> Não</label>
+        </div>
+      </div>
+      <div id="imovelFields" style="display:none"><div id="imovelList"></div><button class="add-btn" onclick="addImovel()">＋ Adicionar imóvel</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🚗 Veículos</div>
+      <div class="field"><label>Possui veículo(s)?</label>
+        <div class="pill-group">
+          <label><input type="radio" name="temVeiculo" value="Sim" onchange="showEl('veiculoFields')"/> Sim</label>
+          <label><input type="radio" name="temVeiculo" value="Não" onchange="hideEl('veiculoFields')"/> Não</label>
+        </div>
+      </div>
+      <div id="veiculoFields" style="display:none"><div id="veiculoList"></div><button class="add-btn" onclick="addVeiculo()">＋ Adicionar veículo</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📈 Investimentos & Aplicações</div>
+      <div class="field"><label>Possui investimentos?</label>
+        <div class="pill-group">
+          <label><input type="radio" name="temInvest" value="Sim" onchange="showEl('investFields')"/> Sim</label>
+          <label><input type="radio" name="temInvest" value="Não" onchange="hideEl('investFields')"/> Não</label>
+        </div>
+      </div>
+      <div id="investFields" style="display:none">
+        <div class="field"><label>Tipos de investimento</label>
+          <div class="pill-group" style="margin-top:.4rem">
+            <label><input type="checkbox" name="tipoInvest" value="Poupança"/> Poupança</label>
+            <label><input type="checkbox" name="tipoInvest" value="CDB/RDB"/> CDB / RDB</label>
+            <label><input type="checkbox" name="tipoInvest" value="LCI/LCA"/> LCI / LCA</label>
+            <label><input type="checkbox" name="tipoInvest" value="Tesouro Direto"/> Tesouro Direto</label>
+            <label><input type="checkbox" name="tipoInvest" value="Ações"/> Ações</label>
+            <label><input type="checkbox" name="tipoInvest" value="FIIs"/> Fundos Imobiliários</label>
+            <label><input type="checkbox" name="tipoInvest" value="Fundos"/> Fundos de Investimento</label>
+            <label><input type="checkbox" name="tipoInvest" value="Previdência Privada"/> Previdência Privada</label>
+            <label><input type="checkbox" name="tipoInvest" value="Criptomoedas"/> Criptomoedas</label>
+            <label><input type="checkbox" name="tipoInvest" value="Outro"/> Outro</label>
+          </div>
+        </div>
+        <div class="row-3">
+          <div class="field"><label>Corretora(s) / Banco(s)</label><input type="text" id="corretoras" placeholder="Ex: XP, Rico, Itaú"/></div>
+          <div class="field"><label>Saldo total em 31/12/2025 (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" id="saldoInvest" placeholder="0,00" min="0" step="0.01"/></div></div>
+          <div class="field"><label>IR retido na fonte (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" id="irInvest" placeholder="0,00" min="0" step="0.01"/></div></div>
+        </div>
+        <div class="field"><label>Vendeu ações / ativos em 2025?</label>
+          <div class="pill-group"><label><input type="radio" name="vendeuAcoes" value="Sim"/> Sim</label><label><input type="radio" name="vendeuAcoes" value="Não"/> Não</label></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">💳 Dívidas & Financiamentos</div>
+      <div class="field"><label>Possui financiamento ou dívida acima de R$ 5.000?</label>
+        <div class="pill-group">
+          <label><input type="radio" name="temDivida" value="Sim" onchange="showEl('dividaFields')"/> Sim</label>
+          <label><input type="radio" name="temDivida" value="Não" onchange="hideEl('dividaFields')"/> Não</label>
+        </div>
+      </div>
+      <div id="dividaFields" style="display:none">
+        <div class="row-3">
+          <div class="field"><label>Tipo</label><select id="tipoDivida"><option value="">Selecione</option><option>Financiamento imobiliário</option><option>Financiamento veículo</option><option>Empréstimo pessoal</option><option>Cartão de crédito</option><option>Outro</option></select></div>
+          <div class="field"><label>Credor / Banco</label><input type="text" id="credor" placeholder="Nome da instituição"/></div>
+          <div class="field"><label>Saldo devedor em 31/12/2025 (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" id="saldoDivida" placeholder="0,00" min="0" step="0.01"/></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🤝 Deduções Adicionais</div>
+      <div class="row-3">
+        <div class="field"><label>Previdência privada PGBL (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" id="pgbl" placeholder="0,00" min="0" step="0.01"/></div></div>
+        <div class="field"><label>Doações a entidades (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" id="doacaoEntidade" placeholder="0,00" min="0" step="0.01"/></div></div>
+        <div class="field"><label>Doações a partidos (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" id="doacaoPartido" placeholder="0,00" min="0" step="0.01"/></div></div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-outline" onclick="goTo(3)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goTo(5)">Próximo →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 5 — DEPENDENTES ══ -->
+  <div class="section" id="sec-5">
+    <div class="sec-title"><h2>Dependentes</h2><p>Cônjuge, filhos e demais dependentes</p></div>
+    <div class="card">
+      <div class="field"><label>Possui dependentes na declaração?</label>
+        <div class="pill-group">
+          <label><input type="radio" name="temDep" value="Sim" onchange="toggleDep(true)"/> Sim</label>
+          <label><input type="radio" name="temDep" value="Não" onchange="toggleDep(false)"/> Não</label>
+        </div>
+      </div>
+    </div>
+    <div id="depContainer"></div>
+    <div id="addDepBtn" style="display:none"><button class="add-btn" onclick="addDep()">＋ Adicionar dependente</button></div>
+    <div class="card" style="margin-top:1.2rem">
+      <div class="field"><label>Observações adicionais</label><textarea id="obs" placeholder="Situações especiais, cirurgias, internações, mudanças no ano, herança, etc."></textarea></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-outline" onclick="goTo(4)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goTo(6)">Próximo →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 6 — DOCUMENTOS ══ -->
+  <div class="section" id="sec-6">
+    <div class="sec-title"><h2>Documentos Necessários</h2><p>Você precisará enviar estes documentos junto com o PDF do formulário</p></div>
+    <div class="ok-box">✅ Ao finalizar este formulário, será gerado um <strong>PDF com todos os seus dados</strong> para você enviar por e-mail para nossa equipe.</div>
+    <div class="card">
+      <div class="card-title">📄 Documentos Obrigatórios</div>
+      <ul class="doc-list">
+        <li><div class="icon">💼</div><div><strong>Informes de Rendimentos</strong><span>De todos os empregadores, INSS, bancos e corretoras — em PDF</span></div></li>
+        <li><div class="icon">🏥</div><div><strong>Informe Anual do Plano de Saúde</strong><span>Documento emitido pela operadora com total pago e reembolsos de 2025</span></div></li>
+        <li><div class="icon">💊</div><div><strong>Reembolsos Recebidos do Plano</strong><span>Extrato ou relatório de todos os reembolsos recebidos em 2025</span></div></li>
+        <li><div class="icon">🩺</div><div><strong>Notas Fiscais e Recibos Médicos</strong><span>De médicos, dentistas, psicólogos, hospitais, laboratórios e clínicas</span></div></li>
+        <li><div class="icon">📈</div><div><strong>Informes de Investimentos</strong><span>Extratos anuais de corretoras, bancos e fundos com saldos e IR retido</span></div></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Documentos Complementares (se aplicável)</div>
+      <ul class="doc-list">
+        <li><div class="icon">🏠</div><div><strong>Escritura ou Contrato de Imóvel</strong><span>Para imóveis comprados, vendidos ou financiados em 2025</span></div></li>
+        <li><div class="icon">🚗</div><div><strong>CRLV / Nota Fiscal de Veículo</strong><span>Para veículos comprados ou vendidos em 2025</span></div></li>
+        <li><div class="icon">📑</div><div><strong>Extrato de Previdência Privada PGBL/VGBL</strong><span>Informe anual emitido pela seguradora</span></div></li>
+        <li><div class="icon">💳</div><div><strong>Extrato de Financiamento</strong><span>Saldo devedor em 31/12/2025</span></div></li>
+        <li><div class="icon">👶</div><div><strong>Documentos dos Dependentes</strong><span>CPF e certidão de nascimento de dependentes novos</span></div></li>
+        <li><div class="icon">🧾</div><div><strong>Notas Fiscais Emitidas (Autônomo/MEI)</strong><span>NFS-e ou relatório do carnê-leão</span></div></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">✅ Confirmação</div>
+      <div class="field"><label>Estou ciente que precisarei enviar os documentos acima <span class="req">*</span></label>
+        <div class="pill-group">
+          <label><input type="radio" name="cienteDoc" value="Sim, estou ciente"/> ✅ Sim, estou ciente</label>
+          <label><input type="radio" name="cienteDoc" value="Tenho dúvidas"/> ❓ Tenho dúvidas</label>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-outline" onclick="goTo(5)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goTo(7)">Revisar →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 7 — REVISÃO ══ -->
+  <div class="section" id="sec-7">
+    <div class="sec-title"><h2>Revisão Final</h2><p>Confira tudo antes de gerar o PDF</p></div>
+    <div class="card" id="summaryCard"></div>
+    <div class="info-box">📄 Ao confirmar, será gerado um <strong>PDF</strong> e os dados serão <strong>enviados automaticamente</strong> para a StartMedIR (se o envio estiver configurado). Guarde o PDF e envie também os <strong>documentos</strong> (informes, extratos) para <strong><a href="mailto:startmedir@gmail.com">startmedir@gmail.com</a></strong>.</div>
+    <div class="nav-row">
+      <button class="btn btn-outline" onclick="goTo(6)">← Voltar</button>
+      <button class="btn btn-gold" id="pdfBtn" onclick="gerarPDF()">📄 Gerar PDF e Finalizar</button>
+    </div>
+    <p id="pdfMsg" style="margin-top:1rem;font-size:.84rem;color:var(--muted);text-align:center"></p>
+  </div>
+
+  <!-- ══ STEP 8 — SUCCESS ══ -->
+  <div class="section" id="sec-8">
+    <div class="card success-page">
+      <div class="big-icon">📄</div>
+      <h2>PDF gerado com sucesso!</h2>
+      <p class="subtitle">O PDF com os dados de <strong id="nomeSuccess"></strong> foi baixado automaticamente.</p>
+      <p id="submitStatus" style="margin-top:.85rem;font-size:.82rem;line-height:1.45;text-align:left;max-width:420px;margin-left:auto;margin-right:auto"></p>
+
+      <div class="pdf-instruction">
+        <h3>📧 Próximo passo: documentos e e-mail</h3>
+        <ul class="step-list">
+          <li><div class="num">1</div><div><strong>Localize o PDF</strong> <span>— pasta Downloads (nome começa com IR_2025_)</span></div></li>
+          <li><div class="num">2</div><div><strong>Documentos</strong> <span>— envie informes de rendimentos, plano de saúde, notas, extratos para <span class="email-highlight"><a href="mailto:startmedir@gmail.com">startmedir@gmail.com</a></span></span></div></li>
+          <li><div class="num">3</div><div><strong>Opcional</strong> <span>— use o botão abaixo para abrir o e-mail com assunto preenchido</span></div></li>
+        </ul>
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn btn-gold" onclick="gerarPDF()">📄 Baixar PDF novamente</button>
+        <a class="btn btn-green" href="mailto:startmedir@gmail.com?subject=Formul%C3%A1rio%20IR%202025" id="emailBtn">📩 Abrir e-mail para enviar</a>
+      </div>
+
+      <p style="margin-top:1.5rem;font-size:.8rem;color:var(--muted)">Dúvidas? <a href="mailto:startmedir@gmail.com" style="color:var(--green);font-weight:500">startmedir@gmail.com</a></p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/**
+ * Envio automático (GitHub Pages = site estático, sem servidor próprio):
+ * 1) Crie uma chave em https://web3forms.com com o e-mail startmedir@gmail.com
+ * 2) Cole a chave abaixo. Os dados + PDF são enviados via API deles para esse e-mail.
+ * Deixe vazio para só gerar PDF e mostrar aviso na tela final.
+ */
+const FORM_CONFIG = {
+  web3AccessKey: '',
+  /** Anexo PDF: no Web3Forms costuma exigir plano pago; se falhar, o envio segue só com o texto. */
+  tryAttachPdf: true
+};
+
+let currentStep = 1;
+const TOTAL = 7;
+let despCount=0, empregoCount=0, imovelCount=0, veiculoCount=0, depCount=0;
+
+function goTo(step) {
+  if (step > currentStep && !validateStep(currentStep)) return;
+  document.getElementById('sec-'+currentStep).classList.remove('active');
+  document.getElementById('sec-'+step).classList.add('active');
+  currentStep = step;
+  updateProgress();
+  if (step === 7) buildSummary();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateProgress() {
+  if (currentStep > TOTAL) {
+    for (let i = 1; i <= TOTAL; i++) {
+      const si = document.getElementById('si-' + i);
+      if (!si) continue;
+      si.classList.remove('active');
+      si.classList.add('done');
+    }
+    for (let i = 1; i < TOTAL; i++) {
+      const c = document.getElementById('conn-' + i);
+      if (c) c.classList.add('done');
+    }
+    return;
+  }
+  for (let i=1; i<=TOTAL; i++) {
+    const si = document.getElementById('si-'+i);
+    if (!si) continue;
+    si.classList.remove('active','done');
+    if (i < currentStep) si.classList.add('done');
+    if (i === currentStep) si.classList.add('active');
+  }
+  for (let i=1; i<TOTAL; i++) {
+    const c = document.getElementById('conn-'+i);
+    if (c) c.classList.toggle('done', i < currentStep);
+  }
+}
+
+function validateStep(step) {
+  let ok = true;
+  if (step === 1) {
+    ['nome','cpf','nascimento','telefone','email','govLogin','govSenha'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el || !el.value.trim()) { if(el) el.classList.add('invalid'); ok = false; }
+      else el.classList.remove('invalid');
+    });
+  }
+  if (!ok) alert('Por favor, preencha todos os campos obrigatórios (*) antes de continuar.');
+  return ok;
+}
+
+document.getElementById('cpf').addEventListener('input', function() {
+  let val = this.value.replace(/\D/g,'');
+  if (val.length > 9) val = val.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/,'$1.$2.$3-$4');
+  else if (val.length > 6) val = val.replace(/(\d{3})(\d{3})(\d{0,3})/,'$1.$2.$3');
+  else if (val.length > 3) val = val.replace(/(\d{3})(\d{0,3})/,'$1.$2');
+  this.value = val;
+});
+
+function showEl(id) { const e=document.getElementById(id); if(e) e.style.display='block'; }
+function hideEl(id) { const e=document.getElementById(id); if(e) e.style.display='none'; }
+function togglePass(id, btn) {
+  const el=document.getElementById(id);
+  el.type = el.type==='password' ? 'text' : 'password';
+  btn.textContent = el.type==='password' ? '👁' : '🙈';
+}
+
+function addEmprego() {
+  empregoCount++;
+  const id = empregoCount;
+  const d = document.createElement('div');
+  d.className='dyn-row'; d.id='emp-'+id;
+  d.innerHTML=`<button class="rm-btn" onclick="removeRow('emp-${id}')">✕ Remover</button>
+    <div class="row-3" style="margin-top:.3rem">
+      <div class="field"><label>Empresa / Fonte pagadora</label><input type="text" placeholder="Nome da empresa"/></div>
+      <div class="field"><label>CNPJ</label><input type="text" placeholder="00.000.000/0000-00"/></div>
+      <div class="field"><label>Rendimento tributável (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" placeholder="0,00" min="0" step="0.01"/></div></div>
+    </div>
+    <div class="row-3">
+      <div class="field"><label>IR retido na fonte (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" placeholder="0,00" min="0" step="0.01"/></div></div>
+      <div class="field"><label>INSS retido (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" placeholder="0,00" min="0" step="0.01"/></div></div>
+      <div class="field"><label>13º salário — IR retido (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" placeholder="0,00" min="0" step="0.01"/></div></div>
+    </div>`;
+  document.getElementById('empregoList').appendChild(d);
+}
+
+function addDespesa() {
+  despCount++;
+  const id = despCount;
+  const d = document.createElement('div');
+  d.className='dyn-row'; d.id='desp-'+id;
+  d.innerHTML=`<button class="rm-btn" onclick="removeRow('desp-${id}')">✕ Remover</button>
+    <div class="row-3" style="margin-top:.3rem">
+      <div class="field"><label>Tipo</label>
+        <select><option value="">Selecione</option><option>Consulta médica</option><option>Consulta odontológica</option><option>Psicólogo / Psiquiatra</option><option>Exame laboratorial</option><option>Exame de imagem</option><option>Internação hospitalar</option><option>Cirurgia</option><option>Fisioterapia</option><option>Aparelho ortodôntico</option><option>Óculos / Lentes</option><option>Outro</option></select>
+      </div>
+      <div class="field"><label>Prestador / Clínica</label><input type="text" placeholder="Nome do prestador"/></div>
+      <div class="field"><label>Valor pago (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" placeholder="0,00" min="0" step="0.01"/></div></div>
+    </div>`;
+  document.getElementById('despesasList').appendChild(d);
+}
+
+function addImovel() {
+  imovelCount++;
+  const id = imovelCount;
+  const d = document.createElement('div');
+  d.className='dyn-row'; d.id='imov-'+id;
+  d.innerHTML=`<button class="rm-btn" onclick="removeRow('imov-${id}')">✕ Remover</button>
+    <div class="row-2" style="margin-top:.3rem">
+      <div class="field"><label>Tipo</label><select><option>Residencial</option><option>Comercial</option><option>Rural</option><option>Terreno</option></select></div>
+      <div class="field"><label>Endereço</label><input type="text" placeholder="Endereço do imóvel"/></div>
+    </div>
+    <div class="row-3">
+      <div class="field"><label>Valor de aquisição (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" placeholder="0,00" min="0" step="0.01"/></div></div>
+      <div class="field"><label>Ano de aquisição</label><input type="number" placeholder="Ex: 2018"/></div>
+      <div class="field"><label>Financiado?</label><select><option>Não</option><option>Sim</option></select></div>
+    </div>`;
+  document.getElementById('imovelList').appendChild(d);
+}
+
+function addVeiculo() {
+  veiculoCount++;
+  const id = veiculoCount;
+  const d = document.createElement('div');
+  d.className='dyn-row'; d.id='veic-'+id;
+  d.innerHTML=`<button class="rm-btn" onclick="removeRow('veic-${id}')">✕ Remover</button>
+    <div class="row-3" style="margin-top:.3rem">
+      <div class="field"><label>Marca / Modelo</label><input type="text" placeholder="Ex: Toyota Corolla 2022"/></div>
+      <div class="field"><label>Placa / Renavam</label><input type="text" placeholder="Placa ou Renavam"/></div>
+      <div class="field"><label>Valor de aquisição (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" placeholder="0,00" min="0" step="0.01"/></div></div>
+    </div>`;
+  document.getElementById('veiculoList').appendChild(d);
+}
+
+function toggleDep(show) {
+  document.getElementById('addDepBtn').style.display = show ? 'block' : 'none';
+  if (show && depCount === 0) addDep();
+}
+function addDep() {
+  depCount++;
+  const id = depCount;
+  const d = document.createElement('div');
+  d.className='card'; d.id='dep-'+id; d.style.position='relative';
+  d.innerHTML=`<button class="rm-btn" onclick="removeRow('dep-${id}')" style="top:14px;right:14px;font-size:.82rem">✕ Remover</button>
+    <div class="card-title" style="font-size:.95rem">👤 Dependente ${id}</div>
+    <div class="row-3">
+      <div class="field"><label>Nome completo</label><input type="text" placeholder="Nome do dependente"/></div>
+      <div class="field"><label>CPF</label><input type="text" placeholder="000.000.000-00"/></div>
+      <div class="field"><label>Parentesco</label><select><option value="">Selecione</option><option>Cônjuge</option><option>Filho(a)</option><option>Pai / Mãe</option><option>Irmão / Irmã</option><option>Outro</option></select></div>
+    </div>
+    <div class="row-3">
+      <div class="field"><label>Data de nascimento</label><input type="date"/></div>
+      <div class="field"><label>Despesas médicas (R$)</label><div class="money-wrap"><span class="pfx">R$</span><input type="number" placeholder="0,00" min="0" step="0.01"/></div></div>
+      <div class="field"><label>Plano de saúde separado?</label><input type="text" placeholder="Operadora + valor anual"/></div>
+    </div>`;
+  document.getElementById('depContainer').appendChild(d);
+}
+
+function removeRow(id) { const el=document.getElementById(id); if(el) el.remove(); }
+
+function v(id) { const el=document.getElementById(id); return el ? el.value.trim() : ''; }
+function radioVal(name) { const el=document.querySelector(`input[name="${name}"]:checked`); return el ? el.value : 'Nao informado'; }
+function checkVals(name) { return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(e=>e.value).join(', ') || 'Nenhum'; }
+function fmt(val) { return val ? 'R$ '+parseFloat(val).toFixed(2) : '—'; }
+
+function buildSummary() {
+  let empText = '';
+  document.querySelectorAll('#empregoList .dyn-row').forEach((row,i) => {
+    const inp = row.querySelectorAll('input');
+    empText += `\n  ${i+1}. ${inp[0]?.value||'-'} | CNPJ: ${inp[1]?.value||'-'} | Rend: R$${parseFloat(inp[2]?.value||0).toFixed(2)} | IR: R$${parseFloat(inp[3]?.value||0).toFixed(2)}`;
+  });
+  let despText = '';
+  document.querySelectorAll('#despesasList .dyn-row').forEach((row,i) => {
+    const els = row.querySelectorAll('select, input[type=text], input[type=number]');
+    despText += `\n  ${i+1}. ${els[0]?.value||'-'} | ${els[1]?.value||'-'} | R$ ${parseFloat(els[2]?.value||0).toFixed(2)}`;
+  });
+  let depText = '';
+  document.querySelectorAll('#depContainer .card').forEach((row,i) => {
+    const inp = row.querySelectorAll('input, select');
+    depText += `\n  Dep.${i+1}: ${inp[0]?.value||'-'} | CPF: ${inp[1]?.value||'-'} | ${inp[2]?.value||'-'}`;
+  });
+
+  const sections = [
+    { t:'👤 Dados Pessoais', items:[['Nome',v('nome')],['CPF',v('cpf')],['Nascimento',v('nascimento')],['Telefone',v('telefone')],['E-mail',v('email')],['Profissão',v('profissao')||'—'],['Estado civil',v('estadoCivil')||'—'],['Tipo declaração',v('tipoDeclaracao')||'—']] },
+    { t:'🔐 Gov.br', items:[['Login',v('govLogin')],['Senha','••••••••'],['Código IRPF',v('codigoIRPF')||'—']] },
+    { t:'💼 Rendimentos', items:[['Emprego/CLT',radioVal('temEmprego')],empText?['Empregadores',empText]:null,['Autônomo/MEI',radioVal('temAutonomo')],['Aluguéis',radioVal('temAluguel')],['Aposentadoria',radioVal('temAposent')]].filter(Boolean) },
+    { t:'🏥 Saúde', items:[['Plano de saúde',radioVal('temPlano')],v('operadora')?['Operadora',v('operadora')]:null,v('valorPlano')?['Total plano',fmt(v('valorPlano'))]:null,v('reembolsoPlano')?['Reembolsos',fmt(v('reembolsoPlano'))]:null,['Despesas médicas',despText||'(nenhuma)']].filter(Boolean) },
+    { t:'📈 Bens & Invest.', items:[['Imóveis',radioVal('temImovel')],['Veículos',radioVal('temVeiculo')],['Investimentos',radioVal('temInvest')],checkVals('tipoInvest')!=='Nenhum'?['Tipos',checkVals('tipoInvest')]:null,v('pgbl')?['PGBL',fmt(v('pgbl'))]:null].filter(Boolean) },
+    { t:'👶 Dependentes', items:[['Possui dependentes',radioVal('temDep')],depText?['Detalhes',depText]:null].filter(Boolean) },
+    { t:'💬 Observações', items:[['Obs.',v('obs')||'—']] },
+  ];
+
+  document.getElementById('summaryCard').innerHTML = sections.map(sec=>`
+    <div class="sum-section">
+      <h3>${sec.t}</h3>
+      ${sec.items.map(([k,val])=>`<div class="sum-item"><span class="sk">${k}</span><span class="sv">${val}</span></div>`).join('')}
+    </div>`).join('');
+}
+
+function buildEmailFromSections(sectionList) {
+  let out = 'STARTMEDIR — Formulário IR 2025 (resumo em texto)\n';
+  out += 'Gerado em: ' + new Date().toLocaleString('pt-BR') + '\n\n';
+  sectionList.forEach(([title, rows]) => {
+    let block = '── ' + title + ' ──\n';
+    let n = 0;
+    rows.forEach(([label, value]) => {
+      if (!value || value === '—' || value === 'Nao informado') return;
+      block += label + ': ' + String(value).replace(/\n/g, ' ') + '\n';
+      n++;
+    });
+    if (n) out += block + '\n';
+  });
+  return out.trim();
+}
+
+async function submitToStartMedIR(emailPlain, pdfBlob, filename) {
+  const statusEl = document.getElementById('submitStatus');
+  if (statusEl) statusEl.textContent = '';
+  const key = (FORM_CONFIG.web3AccessKey || '').trim();
+  if (!key) {
+    if (statusEl) {
+      statusEl.innerHTML = '⚠️ <strong>Envio automático desativado.</strong> Guarde o PDF e envie os documentos para <a href="mailto:startmedir@gmail.com" style="color:var(--green)">startmedir@gmail.com</a>. (Configure FORM_CONFIG.web3AccessKey no código — ver comentário no início do script.)';
+    }
+    return;
+  }
+  if (statusEl) statusEl.textContent = '⏳ Enviando cópia para a StartMedIR…';
+
+  const subject = '[IR 2025] ' + (v('nome') || 'Cliente') + ' — ' + (v('cpf') || '');
+  const userEmail = (v('email') || '').trim();
+  if (!userEmail) {
+    if (statusEl) statusEl.innerHTML = '⚠️ E-mail do titular ausente; não foi possível enviar. Adicione o e-mail no passo 1.';
+    return;
+  }
+
+  async function sendJson() {
+    const payload = {
+      access_key: key,
+      subject: subject,
+      name: v('nome') || 'Formulário IR',
+      email: userEmail,
+      message: emailPlain
+    };
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    return res.json().catch(() => ({}));
+  }
+
+  try {
+    let data;
+    if (FORM_CONFIG.tryAttachPdf && pdfBlob && filename) {
+      const fd = new FormData();
+      fd.append('access_key', key);
+      fd.append('subject', subject);
+      fd.append('name', v('nome') || 'Formulário IR');
+      fd.append('email', userEmail);
+      fd.append('message', emailPlain);
+      fd.append('attachment', pdfBlob, filename);
+      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: fd });
+      data = await res.json().catch(() => ({}));
+      if (!data.success) data = await sendJson();
+    } else {
+      data = await sendJson();
+    }
+
+    if (data.success) {
+      if (statusEl) {
+        statusEl.innerHTML = '✓ <strong>Recebemos os dados</strong> no e-mail da StartMedIR (corpo do e-mail com o resumo). O PDF também foi baixado no seu aparelho — guarde-o e envie os <strong>documentos</strong> (informes, extratos) para o mesmo e-mail se ainda faltarem.';
+      }
+      return;
+    }
+    throw new Error(data.message || 'Resposta inválida do servidor de envio');
+  } catch (e) {
+    if (statusEl) {
+      statusEl.innerHTML = '⚠️ Não foi possível enviar automaticamente: ' + (e.message || String(e)) + '. Envie o PDF manualmente para <a href="mailto:startmedir@gmail.com" style="color:var(--green)">startmedir@gmail.com</a>.';
+    }
+  }
+}
+
+// ══ PDF GENERATION ══
+async function gerarPDF() {
+  const btn = document.getElementById('pdfBtn');
+  const pdfMsg = document.getElementById('pdfMsg');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Gerando PDF...'; }
+  if (pdfMsg) pdfMsg.textContent = '';
+
+  try {
+    if (!window.jspdf) throw new Error('Biblioteca PDF não carregou. Verifique sua conexão.');
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  const GREEN = [26, 107, 74];
+  const GOLD = [200, 150, 62];
+  const LIGHT = [212, 239, 228];
+  const MUTED = [107, 114, 128];
+  const TEXT = [28, 28, 28];
+  const WHITE = [255, 255, 255];
+  const W = 210;
+  const MARGIN = 18;
+  const COL = W - MARGIN * 2;
+  let y = 0;
+
+  function newPage() {
+    doc.addPage();
+    y = 20;
+    // mini header on continuation pages
+    doc.setFillColor(...GREEN);
+    doc.rect(0, 0, W, 12, 'F');
+    doc.setTextColor(...WHITE);
+    doc.setFontSize(7);
+    doc.setFont('helvetica','bold');
+    doc.text('STARTMEDIR · FORMULÁRIO IR 2025', MARGIN, 8);
+    doc.text(`${v('nome').toUpperCase()}`, W - MARGIN, 8, { align: 'right' });
+    y = 20;
+  }
+
+  function checkY(needed) {
+    if (y + needed > 275) newPage();
+  }
+
+  // ── HEADER ──
+  doc.setFillColor(...GREEN);
+  doc.rect(0, 0, W, 45, 'F');
+  // gold accent
+  doc.setFillColor(...GOLD);
+  doc.rect(0, 42, W, 3, 'F');
+  // logo area
+  doc.setTextColor(...WHITE);
+  doc.setFontSize(9);
+  doc.setFont('helvetica','bold');
+  doc.text('STARTMEDIR', MARGIN, 14);
+  doc.setFontSize(18);
+  doc.text('Formulário IR 2025', MARGIN, 26);
+  doc.setFontSize(9);
+  doc.setFont('helvetica','normal');
+  doc.text('Declaração de Imposto de Renda · Ano-calendário 2025', MARGIN, 34);
+  // date
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+  doc.text(`Gerado em: ${dateStr}`, W - MARGIN, 34, { align: 'right' });
+  y = 56;
+
+  // ── CLIENT NAME HIGHLIGHT ──
+  doc.setFillColor(...LIGHT);
+  doc.roundedRect(MARGIN, y, COL, 14, 3, 3, 'F');
+  doc.setTextColor(...GREEN);
+  doc.setFontSize(11);
+  doc.setFont('helvetica','bold');
+  doc.text(v('nome') || 'Cliente', MARGIN + 6, y + 5.5);
+  doc.setFontSize(8);
+  doc.setFont('helvetica','normal');
+  doc.setTextColor(...MUTED);
+  doc.text(`CPF: ${v('cpf')}   |   ${v('email')}   |   ${v('telefone')}`, MARGIN + 6, y + 10.5);
+  y += 20;
+
+  // ── SECTION RENDERER ──
+  function renderSection(emoji, title, rows) {
+    checkY(18);
+    // Section header
+    doc.setFillColor(...GREEN);
+    doc.rect(MARGIN, y, COL, 8, 'F');
+    doc.setTextColor(...WHITE);
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica','bold');
+    doc.text(`${emoji}  ${title}`, MARGIN + 4, y + 5.5);
+    y += 11;
+
+    rows.forEach(([label, value], idx) => {
+      if (!value || value === '—' || value === 'Nao informado') return;
+      const lines = doc.splitTextToSize(String(value), COL * 0.55);
+      const rowH = Math.max(7, lines.length * 4.5 + 3);
+      checkY(rowH);
+
+      // alternating rows
+      if (idx % 2 === 0) {
+        doc.setFillColor(247, 250, 248);
+        doc.rect(MARGIN, y, COL, rowH, 'F');
+      }
+      doc.setDrawColor(209, 217, 213);
+      doc.line(MARGIN, y + rowH, MARGIN + COL, y + rowH);
+
+      doc.setTextColor(...MUTED);
+      doc.setFontSize(7.5);
+      doc.setFont('helvetica','normal');
+      doc.text(label, MARGIN + 3, y + rowH / 2 + 1.5);
+
+      doc.setTextColor(...TEXT);
+      doc.setFont('helvetica','bold');
+      doc.text(lines, MARGIN + COL * 0.42, y + 4);
+      y += rowH;
+    });
+    y += 5;
+  }
+
+  // Collect dynamic data
+  let empRows = [];
+  document.querySelectorAll('#empregoList .dyn-row').forEach((row,i) => {
+    const inp = row.querySelectorAll('input');
+    empRows.push([`Empregador ${i+1}`, `${inp[0]?.value||'-'} | CNPJ: ${inp[1]?.value||'-'} | Rend: R$${parseFloat(inp[2]?.value||0).toFixed(2)} | IR: R$${parseFloat(inp[3]?.value||0).toFixed(2)} | INSS: R$${parseFloat(inp[4]?.value||0).toFixed(2)}`]);
+  });
+  let despRows = [];
+  document.querySelectorAll('#despesasList .dyn-row').forEach((row,i) => {
+    const els = row.querySelectorAll('select, input[type=text], input[type=number]');
+    despRows.push([`Despesa ${i+1}`, `${els[0]?.value||'-'} — ${els[1]?.value||'-'} — R$ ${parseFloat(els[2]?.value||0).toFixed(2)}`]);
+  });
+  let imovelRows = [];
+  document.querySelectorAll('#imovelList .dyn-row').forEach((row,i) => {
+    const els = row.querySelectorAll('select, input');
+    imovelRows.push([`Imóvel ${i+1}`, `${els[0]?.value||'-'} | ${els[1]?.value||'-'} | R$${parseFloat(els[2]?.value||0).toFixed(2)} | Ano: ${els[3]?.value||'-'}`]);
+  });
+  let veicRows = [];
+  document.querySelectorAll('#veiculoList .dyn-row').forEach((row,i) => {
+    const inp = row.querySelectorAll('input');
+    veicRows.push([`Veículo ${i+1}`, `${inp[0]?.value||'-'} | ${inp[1]?.value||'-'} | R$${parseFloat(inp[2]?.value||0).toFixed(2)}`]);
+  });
+  let depRows = [];
+  document.querySelectorAll('#depContainer .card').forEach((row,i) => {
+    const inp = row.querySelectorAll('input, select');
+    depRows.push([`Dependente ${i+1}`, `${inp[0]?.value||'-'} | CPF: ${inp[1]?.value||'-'} | ${inp[2]?.value||'-'} | Nasc: ${inp[3]?.value||'-'} | Desp: R$${parseFloat(inp[4]?.value||0).toFixed(2)}`]);
+  });
+
+  // ── RENDER ALL SECTIONS ──
+  const secPessoal = [
+    ['Nome completo', v('nome')],
+    ['CPF', v('cpf')],
+    ['Data de nascimento', v('nascimento')],
+    ['Telefone / WhatsApp', v('telefone')],
+    ['E-mail', v('email')],
+    ['Profissão', v('profissao')],
+    ['Estado civil', v('estadoCivil')],
+    ['Endereço', v('endereco')],
+    ['Tipo de declaração', v('tipoDeclaracao')],
+    ['Título de eleitor', v('titulo')],
+  ];
+  const secGov = [
+    ['Login (CPF)', v('govLogin')],
+    ['Senha Gov.br', v('govSenha')],
+    ['Código IRPF', v('codigoIRPF') || '—'],
+  ];
+  const secRend = [
+    ['Emprego / CLT', radioVal('temEmprego')],
+    ...empRows,
+    ['Autônomo / MEI', radioVal('temAutonomo')],
+    ['Receita bruta autônomo', fmt(v('receitaBruta'))],
+    ['INSS recolhido', fmt(v('inssMEI'))],
+    ['Emitiu notas fiscais', radioVal('temNF')],
+    ['Recebe aluguéis', radioVal('temAluguel')],
+    ['Total aluguéis', fmt(v('totalAluguel'))],
+    ['Imposto carnê-leão', fmt(v('impostoAluguel'))],
+    ['Aposentadoria / Pensão', radioVal('temAposent')],
+    ['Fonte aposentadoria', v('fontePagAposen')],
+    ['Total aposentadoria', fmt(v('totalAposen'))],
+    ['IR retido aposentadoria', fmt(v('irAposen'))],
+  ];
+  const secSaude = [
+    ['Possui plano de saúde', radioVal('temPlano')],
+    ['Operadora', v('operadora')],
+    ['CNPJ da operadora', v('cnpjPlano')],
+    ['Total pago no ano', fmt(v('valorPlano'))],
+    ['Reembolsos recebidos', fmt(v('reembolsoPlano'))],
+    ['Desconto em folha', fmt(v('descontoFolha'))],
+    ...despRows,
+  ];
+  const secBens = [
+    ['Possui imóveis', radioVal('temImovel')],
+    ...imovelRows,
+    ['Possui veículos', radioVal('temVeiculo')],
+    ...veicRows,
+    ['Possui investimentos', radioVal('temInvest')],
+    ['Tipos de investimento', checkVals('tipoInvest')],
+    ['Corretoras / Bancos', v('corretoras')],
+    ['Saldo total investimentos', fmt(v('saldoInvest'))],
+    ['IR retido investimentos', fmt(v('irInvest'))],
+    ['Vendeu ações em 2025', radioVal('vendeuAcoes')],
+    ['Possui dívidas/financ.', radioVal('temDivida')],
+    ['Tipo dívida', v('tipoDivida')],
+    ['Credor', v('credor')],
+    ['Saldo devedor', fmt(v('saldoDivida'))],
+    ['PGBL', fmt(v('pgbl'))],
+    ['Doações a entidades', fmt(v('doacaoEntidade'))],
+    ['Doações a partidos', fmt(v('doacaoPartido'))],
+  ];
+  const secDep = [
+    ['Possui dependentes', radioVal('temDep')],
+    ...depRows,
+  ];
+  const secObs = [
+    ['Observações', v('obs') || '—'],
+    ['Ciente dos documentos', radioVal('cienteDoc')],
+  ];
+
+  renderSection('1.', 'DADOS PESSOAIS', secPessoal);
+  renderSection('2.', 'ACESSO GOV.BR', secGov);
+  renderSection('3.', 'RENDIMENTOS', secRend);
+  renderSection('4.', 'PLANO DE SAUDE E DESPESAS MEDICAS', secSaude);
+  renderSection('5.', 'BENS E INVESTIMENTOS', secBens);
+  renderSection('6.', 'DEPENDENTES', secDep);
+  renderSection('7.', 'OBSERVACOES', secObs);
+
+  const emailPlain = buildEmailFromSections([
+    ['DADOS PESSOAIS', secPessoal],
+    ['ACESSO GOV.BR', secGov],
+    ['RENDIMENTOS', secRend],
+    ['SAÚDE E DESPESAS MÉDICAS', secSaude],
+    ['BENS E INVESTIMENTOS', secBens],
+    ['DEPENDENTES', secDep],
+    ['OBSERVAÇÕES', secObs],
+  ]);
+
+  // ── FOOTER ON ALL PAGES ──
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= totalPages; p++) {
+    doc.setPage(p);
+    doc.setFillColor(...GREEN);
+    doc.rect(0, 285, W, 12, 'F');
+    doc.setTextColor(...WHITE);
+    doc.setFontSize(7);
+    doc.setFont('helvetica','normal');
+    doc.text('StartMedIR · startmedir@gmail.com · Documento confidencial', MARGIN, 292);
+    doc.text(`Página ${p} de ${totalPages}`, W - MARGIN, 292, { align: 'right' });
+  }
+
+  const nomeClean = v('nome').replace(/[^a-zA-ZÀ-ÿ0-9 ]/g,'').trim().replace(/\s+/g,'_');
+  const filename = `IR_2025_${nomeClean || 'Cliente'}.pdf`;
+  const pdfBlob = doc.output('blob');
+  doc.save(filename);
+
+  await submitToStartMedIR(emailPlain, pdfBlob, filename);
+
+  const emailLink = document.getElementById('emailBtn');
+  if (emailLink) {
+    const subj = encodeURIComponent('Formulário IR 2025 — ' + (v('nome') || 'Cliente'));
+    const body = encodeURIComponent(
+      'Olá,\n\nSegue em anexo o PDF com os dados do formulário IR 2025.\n\n' +
+      'Nome: ' + (v('nome') || '-') + '\n' +
+      'CPF: ' + (v('cpf') || '-') + '\n\n' +
+      'Atenciosamente,'
+    );
+    emailLink.href = 'mailto:startmedir@gmail.com?subject=' + subj + '&body=' + body;
+  }
+
+  const nomeOk = document.getElementById('nomeSuccess');
+  if (nomeOk) nomeOk.textContent = v('nome') || 'Cliente';
+
+  goTo(8);
+
+  } catch (err) {
+    alert(err.message || String(err));
+    if (pdfMsg) pdfMsg.textContent = err.message || String(err);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '📄 Gerar PDF e Finalizar'; }
+  }
+}
+</script>
+</body>
+</html>
