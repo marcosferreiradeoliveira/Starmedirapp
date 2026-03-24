@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Formulário IR 2025 · StartMedIR</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -436,8 +435,8 @@
 
   <!-- ══ STEP 6 — DOCUMENTOS ══ -->
   <div class="section" id="sec-6">
-    <div class="sec-title"><h2>Documentos Necessários</h2><p>Você precisará enviar estes documentos junto com o PDF do formulário</p></div>
-    <div class="ok-box">✅ Ao finalizar este formulário, será gerado um <strong>PDF com todos os seus dados</strong> para você enviar por e-mail para nossa equipe.</div>
+    <div class="sec-title"><h2>Documentos Necessários</h2><p>Documentos que a equipe poderá solicitar após o envio do formulário</p></div>
+    <div class="ok-box">✅ Ao finalizar, os dados são <strong>enviados automaticamente</strong>. Guarde os documentos abaixo para quando forem pedidos.</div>
     <div class="card">
       <div class="card-title">📄 Documentos Obrigatórios</div>
       <ul class="doc-list">
@@ -476,39 +475,23 @@
 
   <!-- ══ STEP 7 — REVISÃO ══ -->
   <div class="section" id="sec-7">
-    <div class="sec-title"><h2>Revisão Final</h2><p>Confira tudo antes de gerar o PDF</p></div>
+    <div class="sec-title"><h2>Revisão Final</h2><p>Confira tudo antes de enviar</p></div>
     <div class="card" id="summaryCard"></div>
-    <div class="info-box">📄 Ao confirmar, será gerado um <strong>PDF</strong> e os dados serão <strong>enviados automaticamente</strong> para a StartMedIR (se o envio estiver configurado). Guarde o PDF e envie também os <strong>documentos</strong> (informes, extratos) para <strong><a href="mailto:startmedir@gmail.com">startmedir@gmail.com</a></strong>.</div>
+    <div class="info-box">📤 Ao confirmar, os dados serão <strong>enviados automaticamente</strong> para nossa equipe.</div>
     <div class="nav-row">
       <button class="btn btn-outline" onclick="goTo(6)">← Voltar</button>
-      <button class="btn btn-gold" id="pdfBtn" onclick="gerarPDF()">📄 Gerar PDF e Finalizar</button>
+      <button class="btn btn-gold" id="submitBtn" onclick="enviarFormulario()">Enviar formulário</button>
     </div>
-    <p id="pdfMsg" style="margin-top:1rem;font-size:.84rem;color:var(--muted);text-align:center"></p>
+    <p id="submitMsg" style="margin-top:1rem;font-size:.84rem;color:var(--muted);text-align:center"></p>
   </div>
 
   <!-- ══ STEP 8 — SUCCESS ══ -->
   <div class="section" id="sec-8">
     <div class="card success-page">
-      <div class="big-icon">📄</div>
-      <h2>PDF gerado com sucesso!</h2>
-      <p class="subtitle">O PDF com os dados de <strong id="nomeSuccess"></strong> foi baixado automaticamente.</p>
-      <p id="submitStatus" style="margin-top:.85rem;font-size:.82rem;line-height:1.45;text-align:left;max-width:420px;margin-left:auto;margin-right:auto"></p>
-
-      <div class="pdf-instruction">
-        <h3>📧 Próximo passo: documentos e e-mail</h3>
-        <ul class="step-list">
-          <li><div class="num">1</div><div><strong>Localize o PDF</strong> <span>— pasta Downloads (nome começa com IR_2025_)</span></div></li>
-          <li><div class="num">2</div><div><strong>Documentos</strong> <span>— envie informes de rendimentos, plano de saúde, notas, extratos para <span class="email-highlight"><a href="mailto:startmedir@gmail.com">startmedir@gmail.com</a></span></span></div></li>
-          <li><div class="num">3</div><div><strong>Opcional</strong> <span>— use o botão abaixo para abrir o e-mail com assunto preenchido</span></div></li>
-        </ul>
-      </div>
-
-      <div class="action-buttons">
-        <button class="btn btn-gold" onclick="gerarPDF()">📄 Baixar PDF novamente</button>
-        <a class="btn btn-green" href="mailto:startmedir@gmail.com?subject=Formul%C3%A1rio%20IR%202025" id="emailBtn">📩 Abrir e-mail para enviar</a>
-      </div>
-
-      <p style="margin-top:1.5rem;font-size:.8rem;color:var(--muted)">Dúvidas? <a href="mailto:startmedir@gmail.com" style="color:var(--green);font-weight:500">startmedir@gmail.com</a></p>
+      <div class="big-icon">✓</div>
+      <h2>Envio realizado</h2>
+      <p class="subtitle">Obrigado, <strong id="nomeSuccess"></strong>.</p>
+      <p id="successDetail" style="margin-top:.6rem;font-size:.88rem;color:var(--text);max-width:380px;margin-left:auto;margin-right:auto;line-height:1.45"></p>
     </div>
   </div>
 
@@ -517,14 +500,15 @@
 <script>
 /**
  * Envio automático (Web3Forms): no GitHub, a chave NÃO fica no repositório.
- * O workflow injeta o secret WEB3_FORMS_ACCESS_KEY no deploy (veja index.html + Actions).
+ * O workflow injeta o secret WEB3_FORMS_ACCESS_KEY no deploy (placeholder abaixo).
  * Teste local: substitua __WEB3_FORMS_KEY__ pela sua chave ou deixe vazio.
  */
 const FORM_CONFIG = {
-  web3AccessKey: '__WEB3_FORMS_KEY__',
-  /** Anexo PDF: no Web3Forms costuma exigir plano pago; se falhar, o envio segue só com o texto. */
-  tryAttachPdf: true
+  web3AccessKey: '__WEB3_FORMS_KEY__'
 };
+
+/** E-mail que deve receber no Web3Forms (cadastre a Access Key com este e-mail). Temporário para testes. */
+const NOTIFICATION_EMAIL = 'marcosfoliveira@gmail.com';
 
 /** `true` = testes: avança entre passos sem exigir campos (*). `false` = produção (obrigatórios no passo 1). */
 const RELAXED_VALIDATION = true;
@@ -754,188 +738,7 @@ function buildEmailFromSections(sectionList) {
   return out.trim();
 }
 
-async function submitToStartMedIR(emailPlain, pdfBlob, filename) {
-  const statusEl = document.getElementById('submitStatus');
-  if (statusEl) statusEl.textContent = '';
-  const key = (FORM_CONFIG.web3AccessKey || '').trim();
-  if (!key) {
-    if (statusEl) {
-      statusEl.innerHTML = '⚠️ <strong>Envio automático desativado.</strong> Guarde o PDF e envie para <a href="mailto:startmedir@gmail.com" style="color:var(--green)">startmedir@gmail.com</a>. No site publicado: secret <code>WEB3_FORMS_ACCESS_KEY</code> + deploy via Actions. Teste local: substitua o placeholder no HTML.';
-    }
-    return;
-  }
-  if (statusEl) statusEl.textContent = '⏳ Enviando cópia para a StartMedIR…';
-
-  const subject = '[IR 2025] ' + (v('nome') || 'Cliente') + ' — ' + (v('cpf') || '');
-  const userEmail = (v('email') || '').trim();
-  if (!userEmail) {
-    if (statusEl) statusEl.innerHTML = '⚠️ E-mail do titular ausente; não foi possível enviar. Adicione o e-mail no passo 1.';
-    return;
-  }
-
-  async function sendJson() {
-    const payload = {
-      access_key: key,
-      subject: subject,
-      name: v('nome') || 'Formulário IR',
-      email: userEmail,
-      message: emailPlain
-    };
-    const res = await fetch('https://api.web3forms.com/submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    return res.json().catch(() => ({}));
-  }
-
-  try {
-    let data;
-    if (FORM_CONFIG.tryAttachPdf && pdfBlob && filename) {
-      const fd = new FormData();
-      fd.append('access_key', key);
-      fd.append('subject', subject);
-      fd.append('name', v('nome') || 'Formulário IR');
-      fd.append('email', userEmail);
-      fd.append('message', emailPlain);
-      fd.append('attachment', pdfBlob, filename);
-      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: fd });
-      data = await res.json().catch(() => ({}));
-      if (!data.success) data = await sendJson();
-    } else {
-      data = await sendJson();
-    }
-
-    if (data.success) {
-      if (statusEl) {
-        statusEl.innerHTML = '✓ <strong>Recebemos os dados</strong> no e-mail da StartMedIR (corpo do e-mail com o resumo). O PDF também foi baixado no seu aparelho — guarde-o e envie os <strong>documentos</strong> (informes, extratos) para o mesmo e-mail se ainda faltarem.';
-      }
-      return;
-    }
-    throw new Error(data.message || 'Resposta inválida do servidor de envio');
-  } catch (e) {
-    if (statusEl) {
-      statusEl.innerHTML = '⚠️ Não foi possível enviar automaticamente: ' + (e.message || String(e)) + '. Envie o PDF manualmente para <a href="mailto:startmedir@gmail.com" style="color:var(--green)">startmedir@gmail.com</a>.';
-    }
-  }
-}
-
-// ══ PDF GENERATION ══
-async function gerarPDF() {
-  const btn = document.getElementById('pdfBtn');
-  const pdfMsg = document.getElementById('pdfMsg');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Gerando PDF...'; }
-  if (pdfMsg) pdfMsg.textContent = '';
-
-  try {
-    if (!window.jspdf) throw new Error('Biblioteca PDF não carregou. Verifique sua conexão.');
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-  const GREEN = [26, 107, 74];
-  const GOLD = [200, 150, 62];
-  const LIGHT = [212, 239, 228];
-  const MUTED = [107, 114, 128];
-  const TEXT = [28, 28, 28];
-  const WHITE = [255, 255, 255];
-  const W = 210;
-  const MARGIN = 18;
-  const COL = W - MARGIN * 2;
-  let y = 0;
-
-  function newPage() {
-    doc.addPage();
-    y = 20;
-    // mini header on continuation pages
-    doc.setFillColor(...GREEN);
-    doc.rect(0, 0, W, 12, 'F');
-    doc.setTextColor(...WHITE);
-    doc.setFontSize(7);
-    doc.setFont('helvetica','bold');
-    doc.text('STARTMEDIR · FORMULÁRIO IR 2025', MARGIN, 8);
-    doc.text(`${v('nome').toUpperCase()}`, W - MARGIN, 8, { align: 'right' });
-    y = 20;
-  }
-
-  function checkY(needed) {
-    if (y + needed > 275) newPage();
-  }
-
-  // ── HEADER ──
-  doc.setFillColor(...GREEN);
-  doc.rect(0, 0, W, 45, 'F');
-  // gold accent
-  doc.setFillColor(...GOLD);
-  doc.rect(0, 42, W, 3, 'F');
-  // logo area
-  doc.setTextColor(...WHITE);
-  doc.setFontSize(9);
-  doc.setFont('helvetica','bold');
-  doc.text('STARTMEDIR', MARGIN, 14);
-  doc.setFontSize(18);
-  doc.text('Formulário IR 2025', MARGIN, 26);
-  doc.setFontSize(9);
-  doc.setFont('helvetica','normal');
-  doc.text('Declaração de Imposto de Renda · Ano-calendário 2025', MARGIN, 34);
-  // date
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
-  doc.text(`Gerado em: ${dateStr}`, W - MARGIN, 34, { align: 'right' });
-  y = 56;
-
-  // ── CLIENT NAME HIGHLIGHT ──
-  doc.setFillColor(...LIGHT);
-  doc.roundedRect(MARGIN, y, COL, 14, 3, 3, 'F');
-  doc.setTextColor(...GREEN);
-  doc.setFontSize(11);
-  doc.setFont('helvetica','bold');
-  doc.text(v('nome') || 'Cliente', MARGIN + 6, y + 5.5);
-  doc.setFontSize(8);
-  doc.setFont('helvetica','normal');
-  doc.setTextColor(...MUTED);
-  doc.text(`CPF: ${v('cpf')}   |   ${v('email')}   |   ${v('telefone')}`, MARGIN + 6, y + 10.5);
-  y += 20;
-
-  // ── SECTION RENDERER ──
-  function renderSection(emoji, title, rows) {
-    checkY(18);
-    // Section header
-    doc.setFillColor(...GREEN);
-    doc.rect(MARGIN, y, COL, 8, 'F');
-    doc.setTextColor(...WHITE);
-    doc.setFontSize(8.5);
-    doc.setFont('helvetica','bold');
-    doc.text(`${emoji}  ${title}`, MARGIN + 4, y + 5.5);
-    y += 11;
-
-    rows.forEach(([label, value], idx) => {
-      if (!value || value === '—' || value === 'Nao informado') return;
-      const lines = doc.splitTextToSize(String(value), COL * 0.55);
-      const rowH = Math.max(7, lines.length * 4.5 + 3);
-      checkY(rowH);
-
-      // alternating rows
-      if (idx % 2 === 0) {
-        doc.setFillColor(247, 250, 248);
-        doc.rect(MARGIN, y, COL, rowH, 'F');
-      }
-      doc.setDrawColor(209, 217, 213);
-      doc.line(MARGIN, y + rowH, MARGIN + COL, y + rowH);
-
-      doc.setTextColor(...MUTED);
-      doc.setFontSize(7.5);
-      doc.setFont('helvetica','normal');
-      doc.text(label, MARGIN + 3, y + rowH / 2 + 1.5);
-
-      doc.setTextColor(...TEXT);
-      doc.setFont('helvetica','bold');
-      doc.text(lines, MARGIN + COL * 0.42, y + 4);
-      y += rowH;
-    });
-    y += 5;
-  }
-
-  // Collect dynamic data
+function buildSubmissionEmailPlain() {
   let empRows = [];
   document.querySelectorAll('#empregoList .dyn-row').forEach((row,i) => {
     const inp = row.querySelectorAll('input');
@@ -962,7 +765,6 @@ async function gerarPDF() {
     depRows.push([`Dependente ${i+1}`, `${inp[0]?.value||'-'} | CPF: ${inp[1]?.value||'-'} | ${inp[2]?.value||'-'} | Nasc: ${inp[3]?.value||'-'} | Desp: R$${parseFloat(inp[4]?.value||0).toFixed(2)}`]);
   });
 
-  // ── RENDER ALL SECTIONS ──
   const secPessoal = [
     ['Nome completo', v('nome')],
     ['CPF', v('cpf')],
@@ -1032,15 +834,7 @@ async function gerarPDF() {
     ['Ciente dos documentos', radioVal('cienteDoc')],
   ];
 
-  renderSection('1.', 'DADOS PESSOAIS', secPessoal);
-  renderSection('2.', 'ACESSO GOV.BR', secGov);
-  renderSection('3.', 'RENDIMENTOS', secRend);
-  renderSection('4.', 'PLANO DE SAUDE E DESPESAS MEDICAS', secSaude);
-  renderSection('5.', 'BENS E INVESTIMENTOS', secBens);
-  renderSection('6.', 'DEPENDENTES', secDep);
-  renderSection('7.', 'OBSERVACOES', secObs);
-
-  const emailPlain = buildEmailFromSections([
+  return 'Notificação (Web3Forms): ' + NOTIFICATION_EMAIL + '\n\n' + buildEmailFromSections([
     ['DADOS PESSOAIS', secPessoal],
     ['ACESSO GOV.BR', secGov],
     ['RENDIMENTOS', secRend],
@@ -1049,49 +843,54 @@ async function gerarPDF() {
     ['DEPENDENTES', secDep],
     ['OBSERVAÇÕES', secObs],
   ]);
+}
 
-  // ── FOOTER ON ALL PAGES ──
-  const totalPages = doc.internal.getNumberOfPages();
-  for (let p = 1; p <= totalPages; p++) {
-    doc.setPage(p);
-    doc.setFillColor(...GREEN);
-    doc.rect(0, 285, W, 12, 'F');
-    doc.setTextColor(...WHITE);
-    doc.setFontSize(7);
-    doc.setFont('helvetica','normal');
-    doc.text('StartMedIR · startmedir@gmail.com · Documento confidencial', MARGIN, 292);
-    doc.text(`Página ${p} de ${totalPages}`, W - MARGIN, 292, { align: 'right' });
+async function submitFormWeb3(emailPlain) {
+  const key = (FORM_CONFIG.web3AccessKey || '').trim();
+  if (!key) {
+    return { ok: false, error: 'Chave Web3Forms não configurada (secret WEB3_FORMS_ACCESS_KEY no deploy ou placeholder local).' };
   }
+  const replyEmail = (v('email') || '').trim() || NOTIFICATION_EMAIL;
+  const payload = {
+    access_key: key,
+    subject: '[IR 2025] ' + (v('nome') || 'Cliente') + ' — ' + (v('cpf') || ''),
+    name: v('nome') || 'Cliente',
+    email: replyEmail,
+    message: emailPlain
+  };
+  const res = await fetch('https://api.web3forms.com/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json().catch(() => ({}));
+  if (data.success) return { ok: true };
+  return { ok: false, error: data.message || 'Resposta inválida do servidor de envio' };
+}
 
-  const nomeClean = v('nome').replace(/[^a-zA-ZÀ-ÿ0-9 ]/g,'').trim().replace(/\s+/g,'_');
-  const filename = `IR_2025_${nomeClean || 'Cliente'}.pdf`;
-  const pdfBlob = doc.output('blob');
-  doc.save(filename);
+async function enviarFormulario() {
+  const btn = document.getElementById('submitBtn');
+  const msg = document.getElementById('submitMsg');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Enviando...'; }
+  if (msg) msg.textContent = '';
 
-  await submitToStartMedIR(emailPlain, pdfBlob, filename);
+  try {
+    const plain = buildSubmissionEmailPlain();
+    const r = await submitFormWeb3(plain);
+    if (!r.ok) throw new Error(r.error || 'Falha no envio');
 
-  const emailLink = document.getElementById('emailBtn');
-  if (emailLink) {
-    const subj = encodeURIComponent('Formulário IR 2025 — ' + (v('nome') || 'Cliente'));
-    const body = encodeURIComponent(
-      'Olá,\n\nSegue em anexo o PDF com os dados do formulário IR 2025.\n\n' +
-      'Nome: ' + (v('nome') || '-') + '\n' +
-      'CPF: ' + (v('cpf') || '-') + '\n\n' +
-      'Atenciosamente,'
-    );
-    emailLink.href = 'mailto:startmedir@gmail.com?subject=' + subj + '&body=' + body;
-  }
-
-  const nomeOk = document.getElementById('nomeSuccess');
-  if (nomeOk) nomeOk.textContent = v('nome') || 'Cliente';
-
-  goTo(8);
-
+    const nomeOk = document.getElementById('nomeSuccess');
+    if (nomeOk) nomeOk.textContent = v('nome') || 'Cliente';
+    const detail = document.getElementById('successDetail');
+    if (detail) {
+      detail.textContent = 'Seus dados foram enviados com sucesso para ' + NOTIFICATION_EMAIL + '.';
+    }
+    goTo(8);
   } catch (err) {
     alert(err.message || String(err));
-    if (pdfMsg) pdfMsg.textContent = err.message || String(err);
+    if (msg) msg.textContent = err.message || String(err);
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '📄 Gerar PDF e Finalizar'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Enviar formulário'; }
   }
 }
 </script>
