@@ -8,7 +8,7 @@ Site estático (`index.html`). A chave **Web3Forms não fica no repositório**: 
    - Nome: `WEB3_FORMS_ACCESS_KEY`  
    - Valor: a *Access Key* do [web3forms.com](https://web3forms.com).
 
-2. A **Access Key deve estar cadastrada no mesmo e-mail** definido em `NOTIFICATION_EMAIL` no `index.html` (hoje `marcosfoliveira@gmail.com` para testes). Quem recebe a notificação é sempre a conta da chave no Web3Forms.
+2. A **Access Key deve estar cadastrada no mesmo e-mail** definido em `NOTIFICATION_EMAIL` no `index.html` (ex.: **startmedir@gmail.com**). Quem recebe a notificação é sempre a conta da chave no Web3Forms.
 
 3. **Settings → Pages → Build and deployment**  
    - Em **Source**, escolha **GitHub Actions**.  
