@@ -498,13 +498,9 @@
 </div>
 
 <script>
-/**
- * Envio automático (Web3Forms): no GitHub, a chave NÃO fica no repositório.
- * O workflow injeta o secret WEB3_FORMS_ACCESS_KEY no deploy (placeholder abaixo).
- * Teste local: substitua __WEB3_FORMS_KEY__ pela sua chave ou deixe vazio.
- */
+/** Web3Forms — chave “pública” (id do formulário); restrinja domínio no painel web3forms.com */
 const FORM_CONFIG = {
-  web3AccessKey: '__WEB3_FORMS_KEY__'
+  web3AccessKey: 'ad85ffc2-aedb-442c-be34-e577e4c7460c'
 };
 
 /** E-mail que deve receber no Web3Forms (cadastre a Access Key com este e-mail). */
@@ -852,13 +848,7 @@ function isValidWeb3AccessKey(k) {
 async function submitFormWeb3(emailPlain) {
   const key = (FORM_CONFIG.web3AccessKey || '').trim();
   if (!key || !isValidWeb3AccessKey(key)) {
-    return {
-      ok: false,
-      error:
-        'Chave Web3Forms inválida ou ausente. No GitHub do repositório: Settings → Secrets and variables → Actions → crie o secret WEB3_FORMS_ACCESS_KEY com o UUID de web3forms.com (conta ' +
-        NOTIFICATION_EMAIL +
-        '). Depois rode o workflow Deploy de novo. Se estiver abrindo o HTML direto do disco, a chave não é injetada — use o site publicado no GitHub Pages.'
-    };
+    return { ok: false, error: 'Chave Web3Forms inválida em FORM_CONFIG.web3AccessKey (deve ser o UUID de web3forms.com).' };
   }
   const replyEmail = (v('email') || '').trim() || NOTIFICATION_EMAIL;
   const payload = {

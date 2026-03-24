@@ -1,4 +1,4 @@
-# Injeta WEB3_FORMS_ACCESS_KEY só no artefato publicado — a chave não fica no Git.
+# Publica index.html no GitHub Pages (chave Web3Forms já está no HTML).
 name: Deploy GitHub Pages
 
 on:
@@ -19,17 +19,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Montar site com chave Web3Forms (secret)
-        env:
-          WEB3_KEY: ${{ secrets.WEB3_FORMS_ACCESS_KEY }}
+      - name: Montar site
         run: |
           mkdir -p _site
           cp index.html _site/index.html
-          if [ -z "$WEB3_KEY" ]; then
-            echo "::error::Defina o repository secret WEB3_FORMS_ACCESS_KEY (UUID da Access Key em https://web3forms.com). Sem isso o formulário não envia."
-            exit 1
-          fi
-          sed -i "s|__WEB3_FORMS_KEY__|${WEB3_KEY}|g" _site/index.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
