@@ -26,11 +26,10 @@ jobs:
           mkdir -p _site
           cp index.html _site/index.html
           if [ -z "$WEB3_KEY" ]; then
-            echo "::warning::Secret WEB3_FORMS_ACCESS_KEY não definido — envio automático ficará vazio no site."
-            sed -i 's/__WEB3_FORMS_KEY__//g' _site/index.html
-          else
-            sed -i "s|__WEB3_FORMS_KEY__|${WEB3_KEY}|g" _site/index.html
+            echo "::error::Defina o repository secret WEB3_FORMS_ACCESS_KEY (UUID da Access Key em https://web3forms.com). Sem isso o formulário não envia."
+            exit 1
           fi
+          sed -i "s|__WEB3_FORMS_KEY__|${WEB3_KEY}|g" _site/index.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

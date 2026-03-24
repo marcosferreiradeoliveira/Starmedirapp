@@ -845,10 +845,20 @@ function buildSubmissionEmailPlain() {
   ]);
 }
 
+function isValidWeb3AccessKey(k) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test((k || '').trim());
+}
+
 async function submitFormWeb3(emailPlain) {
   const key = (FORM_CONFIG.web3AccessKey || '').trim();
-  if (!key) {
-    return { ok: false, error: 'Chave Web3Forms não configurada (secret WEB3_FORMS_ACCESS_KEY no deploy ou placeholder local).' };
+  if (!key || !isValidWeb3AccessKey(key)) {
+    return {
+      ok: false,
+      error:
+        'Chave Web3Forms inválida ou ausente. No GitHub do repositório: Settings → Secrets and variables → Actions → crie o secret WEB3_FORMS_ACCESS_KEY com o UUID de web3forms.com (conta ' +
+        NOTIFICATION_EMAIL +
+        '). Depois rode o workflow Deploy de novo. Se estiver abrindo o HTML direto do disco, a chave não é injetada — use o site publicado no GitHub Pages.'
+    };
   }
   const replyEmail = (v('email') || '').trim() || NOTIFICATION_EMAIL;
   const payload = {

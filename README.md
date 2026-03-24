@@ -5,8 +5,9 @@ Site estático (`index.html`). A chave **Web3Forms não fica no repositório**: 
 ## GitHub Secrets + Pages (Actions)
 
 1. **Repository → Settings → Secrets and variables → Actions → New repository secret**  
-   - Nome: `WEB3_FORMS_ACCESS_KEY`  
-   - Valor: a *Access Key* do [web3forms.com](https://web3forms.com).
+   - Nome exato: **`WEB3_FORMS_ACCESS_KEY`**  
+   - Valor: o *UUID* completo da Access Key em [web3forms.com](https://web3forms.com).  
+   - Sem esse secret, o deploy **falha** de propósito e o site não publica formulário quebrado. O erro “Invalid form_id/access_key format” no navegador = secret ausente ou Pages sem Actions.
 
 2. A **Access Key deve estar cadastrada no mesmo e-mail** definido em `NOTIFICATION_EMAIL` no `index.html` (ex.: **startmedir@gmail.com**). Quem recebe a notificação é sempre a conta da chave no Web3Forms.
 
