@@ -1,0 +1,46 @@
+# Injeta WEB3_FORMS_ACCESS_KEY só no artefato publicado — a chave não fica no Git.
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Montar site com chave Web3Forms (secret)
+        env:
+          WEB3_KEY: ${{ secrets.WEB3_FORMS_ACCESS_KEY }}
+        run: |
+          mkdir -p _site
+          cp index.html _site/index.html
+          if [ -z "$WEB3_KEY" ]; then
+            echo "::warning::Secret WEB3_FORMS_ACCESS_KEY não definido — envio automático ficará vazio no site."
+            sed -i 's/__WEB3_FORMS_KEY__//g' _site/index.html
+          else
+            sed -i "s|__WEB3_FORMS_KEY__|${WEB3_KEY}|g" _site/index.html
+          fi
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

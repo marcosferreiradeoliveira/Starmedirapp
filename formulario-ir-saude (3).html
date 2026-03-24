@@ -516,13 +516,12 @@
 
 <script>
 /**
- * Envio automático (GitHub Pages = site estático, sem servidor próprio):
- * 1) Crie uma chave em https://web3forms.com com o e-mail startmedir@gmail.com
- * 2) Cole a chave abaixo. Os dados + PDF são enviados via API deles para esse e-mail.
- * Deixe vazio para só gerar PDF e mostrar aviso na tela final.
+ * Envio automático (Web3Forms): no GitHub, a chave NÃO fica no repositório.
+ * O workflow injeta o secret WEB3_FORMS_ACCESS_KEY no deploy (veja index.html + Actions).
+ * Teste local: substitua __WEB3_FORMS_KEY__ pela sua chave ou deixe vazio.
  */
 const FORM_CONFIG = {
-  web3AccessKey: 'ad85ffc2-aedb-442c-be34-e577e4c7460c',
+  web3AccessKey: '__WEB3_FORMS_KEY__',
   /** Anexo PDF: no Web3Forms costuma exigir plano pago; se falhar, o envio segue só com o texto. */
   tryAttachPdf: true
 };
@@ -751,7 +750,7 @@ async function submitToStartMedIR(emailPlain, pdfBlob, filename) {
   const key = (FORM_CONFIG.web3AccessKey || '').trim();
   if (!key) {
     if (statusEl) {
-      statusEl.innerHTML = '⚠️ <strong>Envio automático desativado.</strong> Guarde o PDF e envie os documentos para <a href="mailto:startmedir@gmail.com" style="color:var(--green)">startmedir@gmail.com</a>. (Configure FORM_CONFIG.web3AccessKey no código — ver comentário no início do script.)';
+      statusEl.innerHTML = '⚠️ <strong>Envio automático desativado.</strong> Guarde o PDF e envie para <a href="mailto:startmedir@gmail.com" style="color:var(--green)">startmedir@gmail.com</a>. No site publicado: secret <code>WEB3_FORMS_ACCESS_KEY</code> + deploy via Actions. Teste local: substitua o placeholder no HTML.';
     }
     return;
   }

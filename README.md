@@ -1,40 +1,31 @@
 # Formulário IR 2025 · StartMedIR
 
-Site estático (um único HTML + jsPDF). Pode ser publicado no **GitHub Pages** sem backend próprio.
+Site estático (`index.html` + jsPDF). A chave **Web3Forms não fica no repositório**: o GitHub Actions injeta o secret só no arquivo publicado.
 
-## Enviar respostas para `startmedir@gmail.com`
+## GitHub Secrets + Pages (Actions)
 
-Páginas estáticas **não enviam e-mail sozinhas**. Este projeto usa **[Web3Forms](https://web3forms.com)** (grátis para começar): o navegador faz um `POST` para a API deles e eles encaminham o conteúdo para o e-mail cadastrado na chave.
+1. **Repository → Settings → Secrets and variables → Actions → New repository secret**  
+   - Nome: `WEB3_FORMS_ACCESS_KEY`  
+   - Valor: a *Access Key* do [web3forms.com](https://web3forms.com) (conta **startmedir@gmail.com**).
 
-### Configuração rápida
+2. **Settings → Pages → Build and deployment**  
+   - Em **Source**, escolha **GitHub Actions** (não “Deploy from a branch”).  
+   - O workflow `.github/workflows/deploy-pages.yml` publica só `_site/index.html` com a chave já substituída.
 
-1. Acesse [web3forms.com](https://web3forms.com), crie uma chave (**Access Key**) usando o e-mail **startmedir@gmail.com** (é para lá que as notificações chegam).
-2. Abra `index.html` (ou o arquivo do formulário) e localize no `<script>`:
+3. Cada `git push` na `main` dispara o deploy. Na primeira vez, o ambiente **github-pages** pode pedir aprovação em **Actions**.
 
-   ```javascript
-   const FORM_CONFIG = {
-     web3AccessKey: '',
-     tryAttachPdf: true
-   };
-   ```
+**Histórico do Git:** se a chave já foi commitada antes, ela ainda aparece em commits antigos — vale **gerar uma chave nova** no Web3Forms, guardar só no secret e (opcional) revogar a antiga.
 
-3. Cole a chave em `web3AccessKey: 'SUA_CHAVE_AQUI'`, salve e faça o deploy.
-4. No painel do Web3Forms, restrinja **domínios permitidos** ao seu site (ex.: `seudominio.github.io`) para reduzir abuso da chave exposta no HTML.
+**Site no ar:** a chave continua visível no JavaScript que o navegador baixa (inevitável para API no front). O que ganhamos é não versionar no código aberto e poder trocar pelo painel do GitHub.
 
-**PDF anexo:** no Web3Forms, anexo costuma ser **recurso pago**. Com plano gratuito, o e-mail recebe **todo o texto do formulário** no corpo; o PDF continua sendo **baixado** no computador/celular do cliente. Se `tryAttachPdf: true` e o plano não permitir anexo, o código tenta de novo **só com texto**.
+## Web3Forms
 
-### Privacidade
+- Corpo do e-mail = resumo em texto de todos os campos; PDF continua sendo **download** no aparelho do cliente.
+- `tryAttachPdf` tenta anexo; plano gratuito costuma cair no envio só texto (o workflow já trata o fallback no JS).
+- Restrinja **domínios** no painel Web3Forms ao seu `*.github.io`.
 
-O corpo do e-mail inclui dados sensíveis (incluindo credenciais Gov.br, como já estava no PDF). Ao usar Web3Forms, esses dados passam pelos servidores deles. Para máximo controle, alternativa é um **Google Apps Script** ou função serverless própria (fora do escopo deste repositório).
+## Desenvolvimento local
 
-## GitHub Pages
+Abra `index.html` no navegador. Enquanto `web3AccessKey` for o placeholder `__WEB3_FORMS_KEY__`, o envio automático não funciona — para testar, substitua temporariamente pela chave (sem commitar) ou rode um `sed` local.
 
-1. Crie um repositório no GitHub e envie estes arquivos (no mínimo `index.html`).
-2. **Settings → Pages → Build and deployment → Branch** → escolha `main` e pasta **`/ (root)`** (ou `docs/` se colocar o HTML lá).
-3. Após o build, o site ficará em `https://<usuario>.github.io/<repo>/`.
-
-Confirme que `index.html` está na raiz (ou na pasta que o Pages usa). O arquivo `formulario-ir-saude (3).html` é cópia legada; o deploy pode usar só `index.html`.
-
-## Teste local
-
-Abra `index.html` no navegador. Para o envio Web3Forms funcionar, é preciso de **internet** e uma chave válida.
+O arquivo `formulario-ir-saude (3).html` é cópia de trabalho; o deploy usa **`index.html`**.
